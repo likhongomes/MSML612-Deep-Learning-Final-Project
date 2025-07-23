@@ -26,4 +26,12 @@ You will be graded based on the following criteria:
 [5] Paper (typo-free, grammatically correct report and presentation that includes necessary tables and figures illustrating the novelty and evaluation results) (10)
 [6] References (literature review/related work) (10)
 
+
+### Running the project
+- Create a Data folder in the project directory
+- Save the 2023, 2024, and 2024 Parking Violations Folder from Project Google Drive to the Data folder
+- Run initial_data_cleaning.ipynb and then run time_series_converting.ipynb
+
+
+
 One submission per group is sufficient.
