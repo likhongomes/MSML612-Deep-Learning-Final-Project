@@ -2,6 +2,7 @@
 - Create a Data folder in the project directory
 - Save the 2023, 2024, and 2024 Parking Violations folders from the project Google Drive into the Data folder. 
 - Run initial_data_cleaning.ipynb and then run time_series_converting.ipynb
+- Run TabTransformer_Daily_Model_Test.ipynb
 
 
 ## Final Report Guide
