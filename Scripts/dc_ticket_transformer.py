@@ -494,6 +494,54 @@ def predict_probability(lat: float, lon: float, when_iso: str) -> float:
         prob = torch.sigmoid(logit).item()
     return float(prob)
 
+def predict_by_parts(lat: float, lon: float, hour: int, dow: int, month: int | None = None) -> float:
+    """
+    Predict using explicit parts instead of a datetime string.
+      - hour: 0..23
+      - dow: 0..6 (Mon=0)
+      - month: 1..12 (optional). If None, uses the most common month from training.
+    """
+    model, meta, grid_df = load_model_for_inference()
+
+    if month is None:
+        month = int(meta.get("month_mode", 6))
+
+    # Validate ranges
+    if not (0 <= hour <= 23):
+        raise ValueError("hour must be in 0..23")
+    if not (0 <= dow <= 6):
+        raise ValueError("dow must be in 0..6 (Mon=0)")
+    if not (1 <= month <= 12):
+        raise ValueError("month must be in 1..12")
+
+    # Nearest grid id
+    grid_id, _, _ = _nearest_grid(lat, lon, grid_df)
+
+    # Normalize continuous features
+    lat_norm = (lat - meta["lat_min"]) / max(1e-6, (meta["lat_max"] - meta["lat_min"])) * 2 - 1
+    lon_norm = (lon - meta["lon_min"]) / max(1e-6, (meta["lon_max"] - meta["lon_min"])) * 2 - 1
+
+    import math
+    hour_sin = math.sin(2 * math.pi * hour / 24.0)
+    hour_cos = math.cos(2 * math.pi * hour / 24.0)
+    dow_sin = math.sin(2 * math.pi * dow / 7.0)
+    dow_cos = math.cos(2 * math.pi * dow / 7.0)
+    month_sin = math.sin(2 * math.pi * (month - 1) / 12.0)
+    month_cos = math.cos(2 * math.pi * (month - 1) / 12.0)
+
+    cont = torch.tensor(
+        [[lat_norm, lon_norm, hour_sin, hour_cos, dow_sin, dow_cos, month_sin, month_cos]],
+        dtype=torch.float32
+    )
+    cat = torch.tensor(
+        [[hour, dow, month-1, grid_id]],
+        dtype=torch.long
+    )
+
+    with torch.no_grad():
+        logit = model(cat, cont)
+        prob = torch.sigmoid(logit).item()
+    return float(prob)
 
 # -----------------------------
 # CLI
@@ -514,7 +562,11 @@ def main():
     p_pred = subparsers.add_parser("predict", help="Predict probability for a lat/lon/time")
     p_pred.add_argument("--lat", type=float, required=True)
     p_pred.add_argument("--lon", type=float, required=True)
-    p_pred.add_argument("--when", type=str, required=True, help="ISO datetime, e.g., '2025-08-09 14:30'")
+    p_pred.add_argument("--when", type=str, required=False, help="ISO datetime, e.g., '2025-08-09 14:30'")
+
+    p_pred.add_argument("--hour", type=str, required=False, help="ISO datetime, e.g., '23'")
+    p_pred.add_argument("--dow", type=str, required=False, help="ISO datetime, e.g., 'Sunday'")
+    p_pred.add_argument("--month", type=str, required=False, help="ISO datetime, e.g., '6'")
 
     args = parser.parse_args()
 
@@ -535,8 +587,13 @@ def main():
         model.load_state_dict(state)
         eval_model(model, test_loader, device=device)
     elif args.cmd == "predict":
-        prob = predict_probability(args.lat, args.lon, args.when)
-        print(f"Predicted probability: {prob:.4f}")
+        # 
+        if args.when is not None:
+            prob = predict_probability(args.lat, args.lon, args.when)
+        else:
+            prob = predict_by_parts(args.lat, args.lon, int(args.hour), int(args.dow), month=int(args.month) if args.month else None)
+
+        print(f"Predicted probability: {prob*100:.2f}%")
 
 if __name__ == "__main__":
     main()
