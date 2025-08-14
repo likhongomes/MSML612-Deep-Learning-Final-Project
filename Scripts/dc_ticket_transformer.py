@@ -13,6 +13,7 @@ from sklearn.metrics import roc_auc_score, average_precision_score, classificati
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
+from sklearn.metrics import mean_absolute_error, mean_squared_error
 
 import glob
 
@@ -356,6 +357,12 @@ def train_model(train_loader, val_loader, meta, grid_card, epochs=5, lr=1e-3, de
         ap = average_precision_score(y_true, y_prob)
         print(f"Epoch {epoch}: loss={avg_loss:.4f} val_auc={auc:.4f} val_ap={ap:.4f}")
 
+        mae  = mean_absolute_error(y_true, y_prob)
+        rmse = np.sqrt(mean_squared_error(y_true, y_prob))
+        mape_val = mape(y_true, y_prob)
+
+        print(f"MAE: {mae:.4f}, RMSE: {rmse:.4f}, MAPE: {mape_val:.2f}%")
+
         if auc > best_auc:
             best_auc = auc
             best_state = model.state_dict()
@@ -418,6 +425,12 @@ def eval_model(model, test_loader, device="cpu"):
     ap = average_precision_score(y_true, y_prob)
     print("TEST AUC:", round(auc,4), "TEST AP:", round(ap,4))
     print(classification_report((y_prob>0.5).astype(int), y_true.astype(int)))
+
+    mae  = mean_absolute_error(y_true, y_prob)
+    rmse = np.sqrt(mean_squared_error(y_true, y_prob))
+    mape_val = mape(y_true, y_prob)
+
+    print(f"MAE: {mae:.4f}, RMSE: {rmse:.4f}, MAPE: {mape_val:.2f}%")
 
 
 # -----------------------------
@@ -542,6 +555,11 @@ def predict_by_parts(lat: float, lon: float, hour: int, dow: int, month: int | N
         logit = model(cat, cont)
         prob = torch.sigmoid(logit).item()
     return float(prob)
+
+def mape(y_true, y_pred, eps=1e-6):
+    # avoid exploding errors when y_true has zeros
+    denom = np.maximum(np.abs(y_true), eps)
+    return np.mean(np.abs((y_true - y_pred) / denom)) * 100.0
 
 # -----------------------------
 # CLI
