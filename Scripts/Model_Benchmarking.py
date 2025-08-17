@@ -27,7 +27,6 @@ EPOCHS = 20
 LR = 1e-3
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
 SEED = 42
-
 np.random.seed(SEED); torch.manual_seed(SEED)
 
 # -------------------------------
@@ -212,8 +211,13 @@ def train_tabtransformer_regression(xc_tr, xn_tr, y_tr, xc_va, xn_va, y_va,
 
 def mape(y_true, y_pred, eps=1e-6):
     # avoid exploding errors when y_true has zeros
-    denom = np.maximum(np.abs(y_true), eps)
-    return np.mean(np.abs((y_true - y_pred) / denom)) * 100.0
+    # denom = np.maximum(np.abs(y_true), eps)
+
+    # return np.mean(np.abs((y_true - y_pred) / np.maximum(y_true, 1))) * 100
+
+    # return np.mean(np.abs((y_true - y_pred) / denom)) * 100.0
+    y_true, y_pred = np.array(y_true), np.array(y_pred)
+    return np.mean(np.abs((y_true - y_pred) / (y_true + eps))) * 100
 
 # -------------------------------
 # 5) RUN FOR EACH HORIZON & COLLECT METRICS

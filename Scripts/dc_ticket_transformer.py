@@ -558,8 +558,10 @@ def predict_by_parts(lat: float, lon: float, hour: int, dow: int, month: int | N
 
 def mape(y_true, y_pred, eps=1e-6):
     # avoid exploding errors when y_true has zeros
-    denom = np.maximum(np.abs(y_true), eps)
-    return np.mean(np.abs((y_true - y_pred) / denom)) * 100.0
+    # denom = np.maximum(np.abs(y_true), eps)
+    return np.mean(np.abs((y_true - y_pred) / np.maximum(y_true, 1))) * 100
+    # return np.mean(np.abs((y_true - y_pred) / denom)) * 100.0
+
 
 # -----------------------------
 # CLI
