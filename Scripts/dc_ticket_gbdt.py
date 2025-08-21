@@ -276,3 +276,4 @@ if __name__ == "__main__":
         preds = predict_for_dates(future_feature_dates, horizon=h)
         print(f"\nForecast (t+{h}) next 14 days:")
         print(preds.round(2))
+
