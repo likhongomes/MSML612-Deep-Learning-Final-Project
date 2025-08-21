@@ -25,7 +25,7 @@ torch.manual_seed(RANDOM_SEED)
 DATA_PATH = "cleaned_parking_violations_v2.csv"
 MODEL_PATH = "dc_ticket_transformer.pt"
 ENCODER_PATH = "dc_ticket_feature_meta.npz"
-
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu")
 # -----------------------------
 # Data utilities
 # -----------------------------
@@ -268,7 +268,7 @@ class TabTransformer(nn.Module):
                  n_layers=2,
                  cont_dim=8,
                  mlp_hidden=64,
-                 dropout=0.1):
+                 dropout=0.3):
         super().__init__()
         # Embeddings for categorical tokens
         self.hour_emb = nn.Embedding(hour_card, d_token)
@@ -318,7 +318,7 @@ class TabTransformer(nn.Module):
 # Training / Eval
 # -----------------------------
 
-def train_model(train_loader, val_loader, meta, grid_card, epochs=5, lr=1e-3, device="cpu"):
+def train_model(train_loader, val_loader, meta, grid_card, epochs=5, lr=1e-3, device=DEVICE):
     model = TabTransformer(hour_card=24, dow_card=7, month_card=12, grid_card=grid_card,
                            d_token=48, n_heads=4, n_layers=2, cont_dim=8, mlp_hidden=96, dropout=0.1).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
