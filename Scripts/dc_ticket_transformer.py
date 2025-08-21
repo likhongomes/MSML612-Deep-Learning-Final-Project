@@ -615,5 +615,33 @@ def main():
 
         print(f"Predicted probability: {prob*100:.2f}%")
 
+    # --- Metrics ---
+    # Mean Absolute Error
+    mae_train = mean_absolute_error(y_train, pred_train)
+    mae_test  = mean_absolute_error(y_test, pred_test)
+
+    # Root Mean Squared Error
+    rmse_train = root_mean_squared_error(y_train, pred_train)
+    rmse_test  = root_mean_squared_error(y_test, pred_test)
+
+    # Mean Absolute Percentage Error (manual implementation)
+    def mape(y_true, y_pred):
+        y_true, y_pred = np.array(y_true), np.array(y_pred)
+        denom = np.maximum(1, np.abs(y_true))  # avoid div/0
+        return np.mean(np.abs((y_true - y_pred) / denom)) * 100
+
+    mape_train = mape(y_train, pred_train)
+    mape_test  = mape(y_test,  pred_test)
+
+    # --- Print ---
+    print("\n=== Performance ===")
+    print(f"Train MAE : {mae_train:,.2f}")
+    print(f" Test MAE : {mae_test:,.2f}")
+    print(f"Train RMSE: {rmse_train:,.2f}")
+    print(f" Test RMSE: {rmse_test:,.2f}")
+    print(f"Train MAPE: {mape_train:,.2f}%")
+    print(f" Test MAPE: {mape_test:,.2f}%")
+
 if __name__ == "__main__":
     main()
+
