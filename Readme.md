@@ -13,15 +13,18 @@
     - import tabnet_model
 8. Running cell 3 will run the baselines and TabTransformer model
 
-##To run evaluation notebook:
+## To run evaluation notebook:
 1. Open a new Google Colab notebook
-2. Upload tabnet_evaluation.py to Files in the Google Colab notebook
-3. In the notebook at cell 1 do:
+2. Update tabnet_evaluation.py lines 22 & 24 to reflect the names of your project folder and outputs folder
+3. Upload tabnet_evaluation.py to Files in the Google Colab notebook
+4. In the notebook at cell 1 do:
     - from google.colab import drive
     - drive.mount('/content/drive')
-4. In cell 2 do:
+5. In cell 2 do:
     - import sys
     - sys.path.append(PATH_TO_CURRENT_DIR)
-5. In cell 3 do:
+6. In cell 3 do:
     - import tabnet_evaluation
-6. Running cell 3 will save the evaluation plots to a folder called "Eval_Notebook_Artifacts" within the output folder
+7. Running cell 3 will save the evaluation plots to a folder called "Eval_Notebook_Artifacts" within the output folder
+
+Note: These outputs have also been uploaded to this repo in the Eval_Notebook_Outputs folder
