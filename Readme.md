@@ -13,6 +13,8 @@
     - import tabnet_model
 8. Running cell 3 will run the baselines and TabTransformer model
 
+![PHOTO-2025-08-22-19-13-11](https://github.com/user-attachments/assets/0178b900-a0f0-4abf-8734-d7a8985fc613)
+
 ## To run evaluation notebook:
 1. Open a new Google Colab notebook
 2. Update tabnet_evaluation.py lines 22 & 24 to reflect the names of your project folder and outputs folder
